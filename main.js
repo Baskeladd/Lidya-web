@@ -14,7 +14,7 @@ function normalizeTr(str) {
 
 
 async function getUsdTryForMonthEnd(year, month) {
-  const response = await fetch('http://localhost:3000/usdtry');
+  const response = await fetch('https://lidya-web.onrender.com/usdtry');
   const data = await response.json();
 
   // Örn: month = "05", year = "2025"
@@ -488,7 +488,7 @@ async function processSinglePDF(file) {
 
       let usdtry = null;
       try {
-        const response = await fetch('http://localhost:3000/usdtry');
+        const response = await fetch('https://lidya-web.onrender.com/usdtry');
         const data = await response.json();
         const targetPrefix = `${year}-${month}`;
         const filtered = data.filter(entry => entry.date.startsWith(targetPrefix));

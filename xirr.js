@@ -1,5 +1,5 @@
 async function fetchUsdTryData() {
-  const res = await fetch("http://localhost:3000/usdtry");
+  const res = await fetch("https://lidya-web.onrender.com/usdtry");
   return await res.json(); // [{ date: "2025-07-19", close: 33.2 }, ...]
 }
 
