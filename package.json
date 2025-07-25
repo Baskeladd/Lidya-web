@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "axios-cookiejar-support": "^6.0.3",
+    "cors": "^2.8.5",
+    "puppeteer": "^24.11.2",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "tough-cookie": "^5.1.2"
+  }
+}

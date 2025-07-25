@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Lidya PDF Parser</title>
+</head>
+<body>
+  <h1>PDF Yükle</h1>
+  <input type="file" id="pdfInput" multiple />
+  <pre id="output"></pre>
+
+  <select id="monthSelector"></select>
+  <button id="loadSelected">Veriyi Yükle</button>
+  <button id="xirrButton">Yıllık Getiriyi Hesapla (XIRR)</button>
+  <div id="xirrResult" style="margin-bottom: 1rem; font-weight: bold; font-size: 1.1rem;"></div>
+  <pre id="dataOutput"></pre>
+  <canvas id="portfolioChart" width="600" height="300"></canvas>
+
+  <!-- pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <script src="main.js"></script>
+
+  <!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="chart.js"></script>
+
+<script src="xirr.js"></script>
+</body>
+</html>
