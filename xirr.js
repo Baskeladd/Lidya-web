@@ -138,7 +138,11 @@ function calculateXirr(cashflows, guess = 0.1) {
   for (let i = 0; i < maxIterations; i++) {
     const f = xirrResult(rate);
     const fPrime = xirrDerivative(rate);
+    if (!isFinite(fPrime) || Math.abs(fPrime) < 1e-10) {
+    throw new Error(`Türev çok küçük veya sonsuz! rate=${rate}, fPrime=${fPrime}`);
+}
     const newRate = rate - f / fPrime;
+    console.log(`[${i}] rate=${rate}, f=${f}, f'=${fPrime}, newRate=${newRate}`);
     if (Math.abs(newRate - rate) < tol) return newRate;
     rate = newRate;
   }
