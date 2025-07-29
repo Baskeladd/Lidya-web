@@ -122,7 +122,9 @@ function calculateXirr(cashflows, guess = 0.1) {
     const t0 = cashflows[0].date.getTime();
     return cashflows.reduce((acc, cf) => {
       const t = (cf.date.getTime() - t0) / (1000 * 60 * 60 * 24 * 365);
-      return acc + cf.amount / Math.pow(1 + rate, t);
+      const denom = Math.pow(1 + rate, t);
+      if (!isFinite(denom) || denom <= 0) throw new Error(`Geçersiz payda! rate=${rate}, t=${t}`);
+      return acc + cf.amount / denom;
     }, 0);
   }
 
@@ -130,19 +132,29 @@ function calculateXirr(cashflows, guess = 0.1) {
     const t0 = cashflows[0].date.getTime();
     return cashflows.reduce((acc, cf) => {
       const t = (cf.date.getTime() - t0) / (1000 * 60 * 60 * 24 * 365);
-      return acc - (t * cf.amount) / Math.pow(1 + rate, t + 1);
+      const denom = Math.pow(1 + rate, t + 1);
+      if (!isFinite(denom) || denom <= 0) throw new Error(`Geçersiz türev paydası! rate=${rate}, t=${t}`);
+      return acc - (t * cf.amount) / denom;
     }, 0);
   }
 
   let rate = guess;
   for (let i = 0; i < maxIterations; i++) {
+    if (rate <= -0.9999 || !isFinite(rate)) {
+      throw new Error(`Rate -1'e çok yakın veya geçersiz: ${rate}`);
+    }
+
     const f = xirrResult(rate);
     const fPrime = xirrDerivative(rate);
-    if (!isFinite(fPrime) || Math.abs(fPrime) < 1e-10) {
-    throw new Error(`Türev çok küçük veya sonsuz! rate=${rate}, fPrime=${fPrime}`);
-}
+
+    if (!isFinite(fPrime) || isNaN(fPrime) || Math.abs(fPrime) < 1e-10) {
+      throw new Error(`Türev çok küçük veya geçersiz! rate=${rate}, fPrime=${fPrime}`);
+    }
+
     const newRate = rate - f / fPrime;
+
     console.log(`[${i}] rate=${rate}, f=${f}, f'=${fPrime}, newRate=${newRate}`);
+
     if (Math.abs(newRate - rate) < tol) return newRate;
     rate = newRate;
   }
@@ -150,22 +162,38 @@ function calculateXirr(cashflows, guess = 0.1) {
   throw new Error("XIRR hesaplaması yakınsamadı");
 }
 
+
 window.runXirrCalculation = async function () {
   const cashflows = await getXirrCashflows();
   console.log("📊 Cashflows:", cashflows);
 
   const resultBox = document.getElementById("xirrResult");
 
-  try {
-    const xirr = calculateXirr(cashflows);
+  const guesses = [0.1, 0.05, 0.01, -0.05, 0.2];
+  let xirr = null;
+  let lastError = null;
+
+  for (const guess of guesses) {
+    try {
+      console.log(`🧪 Tahmin deneniyor: guess = ${guess}`);
+      xirr = calculateXirr(cashflows, guess);
+      break; // Başarılıysa döngüden çık
+    } catch (e) {
+      console.warn(`❌ Guess ${guess} başarısız:`, e.message);
+      lastError = e;
+    }
+  }
+
+  if (xirr !== null) {
     const percent = (xirr * 100).toFixed(2);
     console.log(`📈 Yıllık getiri (XIRR): ${percent}%`);
 
     resultBox.textContent = `📈 Yıllık USD bazlı getiri (XIRR): %${percent}`;
     resultBox.style.color = "#065f46";
-  } catch (e) {
-    console.error("❌ XIRR hesaplama hatası:", e);
-    resultBox.textContent = "❌ XIRR hesaplama hatası: " + e.message;
+  } else {
+    console.error("❌ XIRR hesaplama hatası:", lastError);
+    resultBox.textContent = "❌ XIRR hesaplama hatası: " + lastError.message;
     resultBox.style.color = "#b91c1c";
   }
 };
+
